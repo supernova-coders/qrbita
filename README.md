@@ -78,21 +78,31 @@ El servidor web debe apuntar a la carpeta `public`. Configura HTTPS, un proceso 
 
 ## Configuración de OpenAI
 
-La clave se usa únicamente en el servidor. Nunca debe incluirse en React, publicarse en el repositorio ni escribirse directamente en `config/services.php`.
+La clave se usa únicamente en el servidor. Nunca debe incluirse en React, publicarse en el repositorio, compartirse por chat ni escribirse directamente en `config/services.php`. Si una clave se ha compartido anteriormente, revócala y genera otra.
+
+1. Crea o selecciona un proyecto en [OpenAI Platform](https://platform.openai.com/).
+2. Revisa la [facturación](https://platform.openai.com/account/billing/overview) y establece un presupuesto apropiado para las pruebas.
+3. Genera una clave nueva en [API keys](https://platform.openai.com/api-keys) y guárdala solo en el archivo `.env` local.
+4. Configura estas variables:
 
 ```dotenv
 OPENAI_API_KEY=tu_clave_aqui
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-6-luna
 OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_DAILY_LIMIT=30
 ```
 
-Si no existe una clave, el formulario manual permanece completamente disponible y la interfaz muestra que la asistencia de IA no está configurada.
+`gpt-6-luna` es la opción predeterminada por su costo y compatibilidad con salida estructurada. El límite diario restringe las propuestas a 30 por usuario durante un período móvil de 24 horas; adicionalmente, configura límites de gasto en OpenAI Platform según el presupuesto disponible. La API no debe suponerse gratuita.
+
+Si no existe una clave, el formulario manual permanece completamente disponible y la interfaz muestra que la asistencia de IA no está configurada. La respuesta de IA solo propone campos permitidos de la vCard y requiere revisión del usuario antes de guardarse. Las entradas y respuestas se validan en el servidor; el modelo no puede ejecutar código ni modificar archivos.
 
 Después de modificar variables de entorno, limpia la configuración almacenada:
 
 ```bash
 php artisan config:clear
 ```
+
+Para probarlo localmente, inicia la aplicación con `composer dev`, accede con una cuenta verificada y activa, abre el editor de tu vCard y escribe una solicitud de al menos 20 caracteres en el asistente. Revisa la propuesta en el formulario y guárdala cuando estés conforme. Si recibes un error de la API, revisa la clave, el saldo o presupuesto del proyecto y `storage/logs/laravel.log`; no copies la clave en reportes de errores.
 
 ## Crear la primera cuenta administradora
 

@@ -37,8 +37,9 @@ return [
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
-        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+        'model' => env('OPENAI_MODEL', 'gpt-6-luna'),
         'base_url' => env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+        'daily_limit' => (int) env('OPENAI_DAILY_LIMIT', 30),
     ],
 
 ];

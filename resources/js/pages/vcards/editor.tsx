@@ -68,6 +68,7 @@ type AiForm = {
         public_email: string;
         website: string;
         description: string;
+        links: Array<Pick<LinkField, 'type' | 'label' | 'url'>>;
     };
 };
 
@@ -292,6 +293,9 @@ export default function VCardEditor({
             public_email: form.data.public_email,
             website: form.data.website,
             description: form.data.description,
+            links: form.data.links
+                .filter((link) => link.url && link.is_active)
+                .map(({ type, label, url }) => ({ type, label, url })),
         },
     });
     const [aiError, setAiError] = useState<string | null>(null);
@@ -320,6 +324,9 @@ export default function VCardEditor({
             public_email: form.data.public_email,
             website: form.data.website,
             description: form.data.description,
+            links: form.data.links
+                .filter((link) => link.url && link.is_active)
+                .map(({ type, label, url }) => ({ type, label, url })),
         }),
         [form.data],
     );
@@ -352,7 +359,11 @@ export default function VCardEditor({
                         );
 
                         return proposalLink
-                            ? { ...link, ...proposalLink, is_active: true }
+                            ? {
+                                  ...link,
+                                  ...proposalLink,
+                                  is_active: link.is_active,
+                              }
                             : link;
                     });
 

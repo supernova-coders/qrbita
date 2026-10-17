@@ -3,9 +3,12 @@
 namespace App\Http\Requests;
 
 use App\Models\VCard;
+use App\Rules\PlainVCardText;
+use App\Support\SocialLinkHost;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreVCardRequest extends FormRequest
 {
@@ -24,15 +27,17 @@ class StoreVCardRequest extends FormRequest
      */
     public function rules(): array
     {
+        $plainText = new PlainVCardText;
+
         return [
-            'title' => ['required', 'string', 'max:120'],
-            'public_name' => ['required', 'string', 'max:120'],
-            'organization' => ['nullable', 'string', 'max:120'],
-            'job_title' => ['nullable', 'string', 'max:120'],
-            'phone' => ['nullable', 'string', 'max:40'],
+            'title' => ['required', 'string', 'max:120', $plainText],
+            'public_name' => ['required', 'string', 'max:120', $plainText],
+            'organization' => ['nullable', 'string', 'max:120', $plainText],
+            'job_title' => ['nullable', 'string', 'max:120', $plainText],
+            'phone' => ['nullable', 'string', 'max:40', $plainText],
             'public_email' => ['nullable', 'email:rfc', 'max:255'],
             'website' => ['nullable', 'url:http,https', 'max:2048'],
-            'description' => ['nullable', 'string', 'max:280'],
+            'description' => ['nullable', 'string', 'max:280', $plainText],
             'accent_color' => ['nullable', Rule::in(['#000000'])],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
@@ -47,10 +52,29 @@ class StoreVCardRequest extends FormRequest
                 'distinct',
                 Rule::in(['facebook', 'instagram', 'linkedin', 'whatsapp', 'tiktok', 'youtube', 'x', 'github']),
             ],
-            'links.*.label' => ['nullable', 'string', 'max:80'],
+            'links.*.label' => ['nullable', 'string', 'max:80', $plainText],
             'links.*.url' => ['nullable', 'url:http,https', 'max:2048'],
             'links.*.is_active' => ['sometimes', 'boolean'],
         ];
+    }
+
+    /** @return array<int, callable> */
+    public function after(): array
+    {
+        return [function (Validator $validator): void {
+            $links = $this->input('links', []);
+
+            foreach (is_array($links) ? $links : [] as $index => $link) {
+                if (is_array($link)
+                    && isset($link['type'], $link['url'])
+                    && is_string($link['type'])
+                    && is_string($link['url'])
+                    && $link['url'] !== ''
+                    && ! SocialLinkHost::accepts($link['type'], $link['url'])) {
+                    $validator->errors()->add("links.{$index}.url", 'El enlace no corresponde a la red social seleccionada.');
+                }
+            }
+        }];
     }
 
     /**

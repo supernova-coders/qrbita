@@ -6,6 +6,7 @@ use App\AiGenerationStatus;
 use App\Http\Requests\GenerateVCardWithAiRequest;
 use App\Models\AiGeneration;
 use App\Services\OpenAiVCardService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -19,6 +20,17 @@ class AiVCardController extends Controller
         GenerateVCardWithAiRequest $request,
         OpenAiVCardService $service,
     ): JsonResponse {
+        $dailyLimit = max(1, (int) config('services.openai.daily_limit', 30));
+
+        if (AiGeneration::query()
+            ->where('user_id', $request->user()->id)
+            ->where('created_at', '>=', now()->subDay())
+            ->count() >= $dailyLimit) {
+            return response()->json([
+                'message' => 'Alcanzaste el límite de solicitudes de IA. Inténtalo de nuevo más tarde o usa el formulario manual.',
+            ], 429);
+        }
+
         $model = (string) config('services.openai.model');
         $generation = AiGeneration::query()->create([
             'user_id' => $request->user()->id,
@@ -31,7 +43,7 @@ class AiVCardController extends Controller
         try {
             $proposal = $service->generate(
                 $request->string('prompt')->toString(),
-                $request->array('current'),
+                $request->validated('current', []),
                 $request->user()->id,
             );
 
@@ -50,6 +62,9 @@ class AiVCardController extends Controller
             Log::warning('OpenAI vCard generation failed.', [
                 'generation_id' => $generation->id,
                 'exception' => $exception::class,
+                'http_status' => $exception instanceof RequestException
+                    ? $exception->response->status()
+                    : null,
             ]);
 
             return response()->json([

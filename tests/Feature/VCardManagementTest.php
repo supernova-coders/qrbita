@@ -48,6 +48,23 @@ test('an authenticated user can create one draft vcard', function () {
     ]);
 });
 
+test('the vcard form rejects active content and deceptive social links', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('vcards.store'), validVCardPayload([
+            'description' => '<script>alert(1)</script>',
+            'links' => [[
+                'type' => 'linkedin',
+                'label' => 'LinkedIn',
+                'url' => 'https://linkedin.com.ejemplo-malicioso.test/in/sara',
+            ]],
+        ]))
+        ->assertSessionHasErrors(['description', 'links.0.url']);
+
+    expect($user->vCard()->count())->toBe(0);
+});
+
 test('a user cannot create a second vcard', function () {
     $user = User::factory()->create();
     VCard::factory()->for($user)->create();
