@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\AlphabeticVCardText;
 use App\Rules\PlainVCardText;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -24,18 +25,19 @@ class GenerateVCardWithAiRequest extends FormRequest
     public function rules(): array
     {
         $plainText = new PlainVCardText;
+        $alphabeticText = new AlphabeticVCardText;
 
         return [
             'prompt' => ['required', 'string', 'min:20', 'max:2000'],
             'current' => ['sometimes', 'array'],
-            'current.title' => ['nullable', 'string', 'max:120', $plainText],
-            'current.public_name' => ['nullable', 'string', 'max:120', $plainText],
-            'current.organization' => ['nullable', 'string', 'max:120', $plainText],
-            'current.job_title' => ['nullable', 'string', 'max:120', $plainText],
+            'current.title' => ['nullable', 'string', 'max:120', $alphabeticText],
+            'current.public_name' => ['nullable', 'string', 'max:120', $alphabeticText],
+            'current.organization' => ['nullable', 'string', 'max:120', $alphabeticText],
+            'current.job_title' => ['nullable', 'string', 'max:120', $alphabeticText],
             'current.phone' => ['nullable', 'string', 'max:40', $plainText],
             'current.public_email' => ['nullable', 'email:rfc', 'max:255'],
             'current.website' => ['nullable', 'url:http,https', 'max:2048'],
-            'current.description' => ['nullable', 'string', 'max:280', $plainText],
+            'current.description' => ['nullable', 'string', 'max:280', $alphabeticText],
             'current.links' => ['sometimes', 'array', 'max:8'],
             'current.links.*' => ['array:type,label,url'],
             'current.links.*.type' => ['required', 'distinct', 'in:facebook,instagram,linkedin,whatsapp,tiktok,youtube,x,github'],

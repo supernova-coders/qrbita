@@ -20,7 +20,7 @@ test('the ai assistant returns a constrained proposal and records the generation
         'phone' => null,
         'public_email' => 'ana@example.com',
         'website' => null,
-        'description' => 'Arquitectura humana y sostenible.',
+        'description' => 'Arquitectura humana y sostenible',
         'links' => [],
     ];
     Http::fake([
@@ -76,7 +76,7 @@ test('the assistant rejects active content and deceptive social links', function
         'phone' => null,
         'public_email' => null,
         'website' => null,
-        'description' => 'Perfil profesional.',
+        'description' => 'Perfil profesional',
         'links' => [],
         ...$changes,
     ];
@@ -96,6 +96,7 @@ test('the assistant rejects active content and deceptive social links', function
     expect(AiGeneration::query()->sole()->status)->toBe(AiGenerationStatus::Failed);
 })->with([
     'script in description' => [['description' => '<script>alert(1)</script>']],
+    'symbols in public name' => [['public_name' => 'Ana//$']],
     'deceptive social link' => [['links' => [[
         'type' => 'linkedin',
         'label' => 'LinkedIn',

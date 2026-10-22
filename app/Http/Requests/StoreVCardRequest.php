@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\VCard;
+use App\Rules\AlphabeticVCardText;
 use App\Rules\PlainVCardText;
 use App\Support\SocialLinkHost;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -28,16 +29,17 @@ class StoreVCardRequest extends FormRequest
     public function rules(): array
     {
         $plainText = new PlainVCardText;
+        $alphabeticText = new AlphabeticVCardText;
 
         return [
-            'title' => ['required', 'string', 'max:120', $plainText],
-            'public_name' => ['required', 'string', 'max:120', $plainText],
-            'organization' => ['nullable', 'string', 'max:120', $plainText],
-            'job_title' => ['nullable', 'string', 'max:120', $plainText],
+            'title' => ['required', 'string', 'max:120', $alphabeticText],
+            'public_name' => ['required', 'string', 'max:120', $alphabeticText],
+            'organization' => ['nullable', 'string', 'max:120', $alphabeticText],
+            'job_title' => ['nullable', 'string', 'max:120', $alphabeticText],
             'phone' => ['nullable', 'string', 'max:40', $plainText],
             'public_email' => ['nullable', 'email:rfc', 'max:255'],
             'website' => ['nullable', 'url:http,https', 'max:2048'],
-            'description' => ['nullable', 'string', 'max:280', $plainText],
+            'description' => ['nullable', 'string', 'max:280', $alphabeticText],
             'accent_color' => ['nullable', Rule::in(['#000000'])],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],

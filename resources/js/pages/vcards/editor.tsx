@@ -97,6 +97,13 @@ const linkOptions: Array<{ type: VCardLinkType; label: string }> = [
     { type: 'github', label: 'GitHub' },
 ];
 
+function personalText(value: string): string {
+    return value
+        .replace(/[^\p{L}\p{M} ]/gu, '')
+        .replace(/ {2,}/g, ' ')
+        .replace(/^ /, '');
+}
+
 function initialLinks(vCard: VCard | null): LinkField[] {
     return linkOptions.map((option) => {
         const existing = vCard?.links.find((link) => link.type === option.type);
@@ -566,6 +573,10 @@ export default function VCardEditor({
                                         Información principal
                                     </h2>
                                 </div>
+                                <p className="mb-5 text-sm text-zinc-500">
+                                    Usa solo letras y espacios en estos campos.
+                                    Se permiten tildes y diéresis.
+                                </p>
                                 <div className="grid gap-5 sm:grid-cols-2">
                                     <Field
                                         id="title"
@@ -579,7 +590,7 @@ export default function VCardEditor({
                                             onChange={(e) =>
                                                 form.setData(
                                                     'title',
-                                                    e.target.value,
+                                                    personalText(e.target.value),
                                                 )
                                             }
                                             maxLength={120}
@@ -596,7 +607,7 @@ export default function VCardEditor({
                                             onChange={(e) =>
                                                 form.setData(
                                                     'public_name',
-                                                    e.target.value,
+                                                    personalText(e.target.value),
                                                 )
                                             }
                                             maxLength={120}
@@ -614,7 +625,7 @@ export default function VCardEditor({
                                             onChange={(e) =>
                                                 form.setData(
                                                     'job_title',
-                                                    e.target.value,
+                                                    personalText(e.target.value),
                                                 )
                                             }
                                             maxLength={120}
@@ -632,7 +643,7 @@ export default function VCardEditor({
                                             onChange={(e) =>
                                                 form.setData(
                                                     'organization',
-                                                    e.target.value,
+                                                    personalText(e.target.value),
                                                 )
                                             }
                                             maxLength={120}
@@ -652,7 +663,7 @@ export default function VCardEditor({
                                                 onChange={(e) =>
                                                     form.setData(
                                                         'description',
-                                                        e.target.value,
+                                                        personalText(e.target.value),
                                                     )
                                                 }
                                                 maxLength={280}
