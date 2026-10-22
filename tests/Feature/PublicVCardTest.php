@@ -82,6 +82,21 @@ test('the owner can render a png qr code', function () {
     $response = $this->actingAs($vCard->user)
         ->get(route('vcards.qr', $vCard));
 
-    $response->assertOk()->assertHeader('Content-Type', 'image/png');
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'image/png')
+        ->assertHeader('Content-Disposition', 'inline; filename="qrbita-'.$vCard->slug.'.png"');
     expect(substr($response->getContent(), 1, 3))->toBe('PNG');
+});
+
+test('the owner can download a png qr code', function () {
+    $vCard = VCard::factory()->published()->create();
+
+    $response = $this->actingAs($vCard->user)
+        ->get(route('vcards.qr', $vCard).'?download=1');
+
+    $response->assertOk()
+        ->assertHeader('Content-Type', 'image/png')
+        ->assertDownload('qrbita-'.$vCard->slug.'.png');
+    expect(bin2hex(substr($response->streamedContent(), 0, 8)))
+        ->toBe('89504e470d0a1a0a');
 });

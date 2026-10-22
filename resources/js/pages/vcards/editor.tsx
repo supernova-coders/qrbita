@@ -934,6 +934,7 @@ export default function VCardEditor({
                                         </p>
                                         <a
                                             href={vCard.qr_download_url ?? '#'}
+                                            download={`qrbita-${vCard.slug}.png`}
                                             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold hover:underline"
                                         >
                                             <Download className="size-4" />{' '}

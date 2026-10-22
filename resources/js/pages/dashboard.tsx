@@ -254,7 +254,10 @@ export default function Dashboard({
                                             variant="outline"
                                             className="mt-auto rounded-full"
                                         >
-                                            <a href={vCard.qr_download_url}>
+                                            <a
+                                                href={vCard.qr_download_url}
+                                                download={`qrbita-${vCard.slug}.png`}
+                                            >
                                                 <Download /> Descargar PNG
                                             </a>
                                         </Button>
